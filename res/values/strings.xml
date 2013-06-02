@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Buildings</string>
+    <string name="title_building_detail">Building Detail</string>
+    <string name="gallery">Building Images</string>
+	<string name="splash">Splash Screen</string> 
+	<string name="building_desc">Building Images</string>
+</resources>
