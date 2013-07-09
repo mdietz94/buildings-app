@@ -42,7 +42,7 @@ public class ComboView extends View {
 	
 	public void setBuilding(Building building)
 	{
-		mDrawable = ((BitmapDrawable)context.getResources().getDrawable(building.get_images()[0])).getBitmap();
+		mDrawable = ((BitmapDrawable)building.get_images()[0]).getBitmap();
 		if (getWidth() > 0 && getHeight() > 0)
 			mDrawable = Bitmap.createScaledBitmap(mDrawable, getWidth(), getHeight(), false);
 		mText = building.get_name();
@@ -105,7 +105,7 @@ public class ComboView extends View {
 		//mDistanceBackground = ((BitmapDrawable)a.getDrawable(R.styleable.ComboView_distanceBackground)).getBitmap();
 		this.context = context;
 		mTextColor = Color.WHITE;
-		mDrawable = ((BitmapDrawable)context.getResources().getDrawable(building.get_images()[0])).getBitmap();
+		mDrawable = ((BitmapDrawable)building.get_images()[0]).getBitmap();
 		mText = building.get_name();
 		mTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 		mTextPaint.setColor(mTextColor);

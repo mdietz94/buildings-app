@@ -2,6 +2,8 @@ package com.example.buildings;
 
 import java.io.Serializable;
 
+import android.graphics.drawable.Drawable;
+
 
 
 public class Building implements Serializable {
@@ -23,7 +25,7 @@ public class Building implements Serializable {
 	String _description;
 	String _architect;
 	String[] _keywords;
-	Integer[] _images;
+	Drawable[] _images;
 	
 	// Getters and Setters
 	public Float get_latitude() { return _latitude; }
@@ -108,10 +110,10 @@ public class Building implements Serializable {
 		if (_keywords != null)
 		this._keywords = _keywords;
 	}
-	public Integer[] get_images() {
+	public Drawable[] get_images() {
 		return _images;
 	}
-	public void set_images(Integer[] _images) {
+	public void set_images(Drawable[] _images) {
 		this._images = _images;
 	}
 

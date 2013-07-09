@@ -18,6 +18,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -125,23 +126,23 @@ public class SplashActivity extends Activity {
 					tmp.set_description(building.getString("date"));
 					tmp.set_keywords(building.getString("keywords").split(";"));
 					tmp.set_location(Float.parseFloat(building.getString("latitude")), Float.parseFloat(building.getString("longitude")));
-					/*Integer[] images = new Integer[5];
+					Drawable[] images = new Drawable[5];
 					String base = "bldg" + tmp.get_id().toString() + "x";
 					boolean hasImages = false;
 					for (int x = 0; x < 5; x++){
-						int id = 0;
 						HttpResponse resp = httpClient.execute(new HttpGet("www.bldg.com/static/images/" + base + x));
 						if (resp.getStatusLine().getStatusCode() == HttpStatus.SC_OK){
-							ByteArrayOutputStream img = new ByteArrayOutputStream();
-							resp.getEntity().writeTo(img);
-							images[x] = 
+							images[x] = Drawable.createFromStream(resp.getEntity().getContent(), null);
+							hasImages = true;
 						} else if (resp.getStatusLine().getStatusCode() == HttpStatus.SC_NOT_FOUND){
-							;
+							break;
 						} else {
-							;
+							Log.e("BuildingContent", "Error trying to load images: " + resp.getStatusLine().getStatusCode());
+							break;
 						}
-					}*/
-					BuildingContent.addItem(tmp);
+					}
+					if (hasImages) // if there are no images, not worth it
+						BuildingContent.addItem(tmp);
 					} catch(JSONException e) {
 						Log.d("bldg", "Stub building found... skipping");
 					}

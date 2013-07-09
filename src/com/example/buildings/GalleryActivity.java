@@ -2,6 +2,7 @@ package com.example.buildings;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.MotionEvent;
 import android.view.View;
@@ -14,7 +15,7 @@ import android.widget.ImageView;
 import android.widget.ViewSwitcher.ViewFactory;
 
 public class GalleryActivity extends Activity implements ViewFactory {
-	private Integer				mImages[];
+	private Drawable			mImages[];
 	private int					mIndex;
 	private ImageSwitcher		iSwitcher;
 	private float				mOrigX;
@@ -35,8 +36,7 @@ public class GalleryActivity extends Activity implements ViewFactory {
 				android.R.anim.slide_in_left));
 		iSwitcher.setOutAnimation(AnimationUtils.loadAnimation(this,
 				android.R.anim.slide_out_right));
-		iSwitcher.setImageResource(mImages[mIndex]);
-		
+		iSwitcher.setImageDrawable(mImages[mIndex]);
 		iSwitcher.setOnTouchListener(new OnTouchListener(){
 
 			@Override
@@ -49,12 +49,12 @@ public class GalleryActivity extends Activity implements ViewFactory {
 						iSwitcher.setInAnimation(AnimationUtils.loadAnimation(getApplicationContext(), android.R.anim.slide_in_left));
 						iSwitcher.setOutAnimation(AnimationUtils.loadAnimation(getApplicationContext(), android.R.anim.slide_out_right));
 						if (--mIndex > 0)
-							iSwitcher.setImageResource(mImages[mIndex]);
+							iSwitcher.setImageDrawable(mImages[mIndex]);
 						else {
 							mIndex = mImages.length - 1;
 							while (mImages[mIndex] == null)
 								mIndex--;
-							iSwitcher.setImageResource(mImages[mIndex]);
+							iSwitcher.setImageDrawable(mImages[mIndex]);
 						}
 					}
 					else
@@ -62,10 +62,10 @@ public class GalleryActivity extends Activity implements ViewFactory {
 						iSwitcher.setInAnimation(AnimationUtils.loadAnimation(getApplicationContext(), R.anim.slide_in_right));
 						iSwitcher.setOutAnimation(AnimationUtils.loadAnimation(getApplicationContext(), R.anim.slide_out_left));
 						if (++mIndex < mImages.length && mImages[mIndex] != null)
-							iSwitcher.setImageResource(mImages[mIndex]);
+							iSwitcher.setImageDrawable(mImages[mIndex]);
 						else {
 							mIndex = 0;
-							iSwitcher.setImageResource(mImages[mIndex]);
+							iSwitcher.setImageDrawable(mImages[mIndex]);
 						}
 					}
 				}

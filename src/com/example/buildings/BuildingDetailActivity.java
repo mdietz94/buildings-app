@@ -29,7 +29,7 @@ public class BuildingDetailActivity extends Activity {
 		mItem = BuildingContent.ITEM_MAP.get(getIntent().getIntExtra(ARG_ITEM_ID, -1));
 		
 		ImageButton iButton = (ImageButton)findViewById(R.id.buildingImage);
-		iButton.setImageResource(mItem.get_images()[0]);
+		iButton.setImageDrawable(mItem.get_images()[0]);
 		iButton.setOnClickListener(new OnClickListener(){
 
 			@Override
