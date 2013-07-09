@@ -1,16 +1,23 @@
 package com.example.buildings;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.res.Resources;
-import android.database.Cursor;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -81,118 +88,76 @@ public class SplashActivity extends Activity {
 		@Override
 		protected Void doInBackground(Context... args)
 		{
-
-			Context context = args[0];
+			publishProgress(101);
+			while (BuildingContent.LONGITUDE == null) {
+				try {
+					wait(500);
+				} catch (Exception e) {
+				}
+			}
+			publishProgress(0);
 			BuildingContent.ITEM_MAP = new SparseArray<Building>();
 			BuildingContent.ITEMS = new ArrayList<Building>();
 			Log.i("BuildingContent", "BuildingContent Initialized!");
-			DatabaseHelper helper = new DatabaseHelper(context);
-			helper.createDatabase();
-			helper.openDatabase();
-			Cursor cursor = helper.database.query("buildings", null, null,
-					null, null, null, null, null);
-			Resources res = context.getResources();
-			int count = 0;
-			if (cursor.moveToFirst()) {
-				do {
+			HttpClient httpClient = new DefaultHttpClient();
+			HttpResponse response;
+			try {
+				response = httpClient.execute(new HttpGet("www.bldg.com/find-by-location/" + BuildingContent.LATITUDE + "/" + BuildingContent.LONGITUDE));
+			if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK){
+				ByteArrayOutputStream out = new ByteArrayOutputStream();
+				response.getEntity().writeTo(out);
+				out.close();
+				String responseString = out.toString();
+				JSONArray buildings = new JSONArray(responseString);
+				for(int i = 0; i < buildings.length(); i++){
+					try {
 					Building tmp = new Building();
-					int column = -1;
-
-					if ((column = cursor.getColumnIndex("_id")) > -1)
-						tmp.set_id(cursor.getInt(column));
-
-					Integer[] images = new Integer[5];
+					JSONObject building = buildings.getJSONObject(i);
+					tmp.set_id(building.getInt("_id"));
+					tmp.set_name(building.getString("name"));
+					tmp.set_architect(building.getString("architect"));
+					tmp.set_country(building.getString("country"));
+					tmp.set_state(building.getString("state"));
+					tmp.set_city(building.getString("city"));
+					tmp.set_region(building.getString("region"));
+					tmp.set_address(building.getString("address"));
+					tmp.set_date(building.getString("date"));
+					tmp.set_description(building.getString("date"));
+					tmp.set_keywords(building.getString("keywords").split(";"));
+					tmp.set_location(Float.parseFloat(building.getString("latitude")), Float.parseFloat(building.getString("longitude")));
+					/*Integer[] images = new Integer[5];
 					String base = "bldg" + tmp.get_id().toString() + "x";
 					boolean hasImages = false;
-					for (int i = 0; i < 5; i++) {
+					for (int x = 0; x < 5; x++){
 						int id = 0;
-						if ((id = res.getIdentifier(base + i, "drawable",
-								context.getPackageName())) == 0)
-							break;
-						hasImages = true;
-						images[i] = id;
-					}
-
-					boolean hasLocation = false;
-					if ((column = cursor.getColumnIndex("latitude")) > -1
-							&& cursor.getFloat(column) != 0) {
-						int col2;
-						if ((col2 = cursor.getColumnIndex("longitude")) > -1) {
-							tmp.set_location(cursor.getFloat(column),
-									cursor.getFloat(col2));
-							hasLocation = true;
+						HttpResponse resp = httpClient.execute(new HttpGet("www.bldg.com/static/images/" + base + x));
+						if (resp.getStatusLine().getStatusCode() == HttpStatus.SC_OK){
+							ByteArrayOutputStream img = new ByteArrayOutputStream();
+							resp.getEntity().writeTo(img);
+							images[x] = 
+						} else if (resp.getStatusLine().getStatusCode() == HttpStatus.SC_NOT_FOUND){
+							;
+						} else {
+							;
 						}
+					}*/
+					BuildingContent.addItem(tmp);
+					} catch(JSONException e) {
+						Log.d("bldg", "Stub building found... skipping");
 					}
-					if (hasImages && hasLocation) {
-						tmp.set_images(images);
-
-						if ((column = cursor.getColumnIndex("name")) > -1)
-							tmp.set_name(cursor.getString(column));
-						if ((column = cursor.getColumnIndex("architect")) > -1)
-							tmp.set_architect(cursor.getString(column));
-						if ((column = cursor.getColumnIndex("country")) > -1)
-							tmp.set_country(cursor.getString(column));
-						if ((column = cursor.getColumnIndex("state")) > -1)
-							tmp.set_state(cursor.getString(column));
-						if ((column = cursor.getColumnIndex("city")) > -1)
-							tmp.set_city(cursor.getString(column));
-						if ((column = cursor.getColumnIndex("region")) > -1)
-							tmp.set_region(cursor.getString(column));
-						if ((column = cursor.getColumnIndex("address")) > -1)
-							tmp.set_address(cursor.getString(column));
-						if ((column = cursor.getColumnIndex("date")) > -1)
-							tmp.set_date(cursor.getString(column));
-						if ((column = cursor.getColumnIndex("description")) > -1)
-							tmp.set_description(cursor.getString(column));
-						if ((column = cursor.getColumnIndex("keywords")) > -1) {
-							String str = null;
-							if ((str = cursor.getString(column)) != null)
-								tmp.set_keywords(str.split(";"));
-						}
-
-						BuildingContent.addItem(tmp);
-						publishProgress((int) (++count
-								/ Math.min(100, (float) cursor.getCount()) * 100.0f));
-					}
-					if (count >= 100)
-						break;
-				} while (cursor.moveToNext());
-				helper.close();
-
-				publishProgress(101);
-
-				while (BuildingContent.LONGITUDE == null) {
-					try {
-						wait(500);
-					} catch (Exception e) {
-					}
+					publishProgress((int)((i / (float)buildings.length()) * 100.0f));
 				}
-				publishProgress(102);
-
-				Collections.sort(BuildingContent.ITEMS,
-						new Comparator<Building>() {
-
-							@Override
-							public int compare(Building arg0, Building arg1)
-							{
-								Float dist0 = (float) (Math.pow(
-										Math.abs(arg0.get_latitude()
-												- BuildingContent.LATITUDE), 2f) + Math
-										.pow(Math.abs(arg0.get_longitude()
-												- BuildingContent.LONGITUDE),
-												2f));
-								Float dist1 = (float) (Math.pow(
-										Math.abs(arg1.get_latitude()
-												- BuildingContent.LATITUDE), 2f) + Math
-										.pow(Math.abs(arg1.get_longitude()
-												- BuildingContent.LONGITUDE),
-												2f));
-								return dist0.compareTo(dist1);
-							}
-						});
-
 			}
-
+			else
+			{
+				Log.e("BuildingContent", "Error connecting to www.bldg.com");
+				response.getEntity().getContent().close();
+			}
+			} catch (IOException e) {
+				Log.e("BuildingContent", "IOException trying to connect to www.bldg.com");
+			} catch (JSONException e) {
+				Log.e("BuildingContent", "JSONException trying to initialize the buildings array");
+			}
 			return null;
 		}
 
@@ -203,8 +168,6 @@ public class SplashActivity extends Activity {
 				percentComplete.setText(values[0].toString());
 			else if (values[0] == 101)
 				percentComplete.setText("Waiting for location fix!");
-			else
-				percentComplete.setText("Sorting database by location...");
 		}
 
 		@Override
