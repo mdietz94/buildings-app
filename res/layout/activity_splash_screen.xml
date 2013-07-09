@@ -17,7 +17,6 @@
         android:layout_gravity="center"
         android:gravity="center"
         android:textColor="#fff"
-        android:textSize="50sp"
-        android:text="Loading" />
+        android:textSize="50sp" />
     
 </FrameLayout>
